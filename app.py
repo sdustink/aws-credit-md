@@ -17,6 +17,7 @@ st.set_page_config(page_title="Credit Score App", layout="wide")
 st.title("💳 Credit Score Classification App (AWS Version)")
 st.markdown("---")
 
+# Membuat 3 kolom untuk form input data
 col_left, col_mid, col_right = st.columns(3)
 
 with col_left:
@@ -61,6 +62,7 @@ with col_right:
 st.markdown("---")
 
 if st.button("🚀 Make Prediction", type="primary", use_container_width=True):
+    # Menyusun input menjadi format dictionary
     input_dict = {
         "Credit_Mix": credit_mix,
         "Payment_of_Min_Amount": payment_of_min_amount,
@@ -87,7 +89,7 @@ if st.button("🚀 Make Prediction", type="primary", use_container_width=True):
 
     input_df = pd.DataFrame([input_dict])
 
-    with st.spinner("Sending request to SageMaker Endpoint..."):
+    with st.spinner("Sending data and requesting prediction from SageMaker..."):
         try:
             payload = input_df.to_csv(header=False, index=False).strip()
             
@@ -102,10 +104,11 @@ if st.button("🚀 Make Prediction", type="primary", use_container_width=True):
             
             pred_label = predictions[0] if isinstance(predictions, list) else predictions
 
+            # 4. Tampilkan Hasil Prediksi ke Layar Aplikasi
             st.subheader("Prediction Result:")
-            if pred_label in ["Good", 1, "1"]:
+            if str(pred_label) in ["Good", "1"]:
                 st.success(f"🎯 Credit Score: **Good**")
-            elif pred_label in ["Standard", 0, "0"]:
+            elif str(pred_label) in ["Standard", "0"]:
                 st.info(f"⚠️ Credit Score: **Standard**")
             else:
                 st.error(f"🚨 Credit Score: **Poor**")
