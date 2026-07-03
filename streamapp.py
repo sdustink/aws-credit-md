@@ -162,12 +162,10 @@ def main():
         with st.spinner("Sending to SageMaker Endpoint..."):
             try:
                 res_data = invoke_sagemaker_endpoint(payload)
-
                 predictions = res_data.get("predictions", [])
-
+            
                 if predictions:
                     pred_label = predictions[0].get("prediction", "Unknown")
-
                     st.subheader("Prediction Result:")
                     if pred_label == "Good":
                         st.success(f"🎯 Credit Score: **{pred_label}**")
@@ -177,6 +175,8 @@ def main():
                         st.error(f"🚨 Credit Score: **{pred_label}**")
                 else:
                     st.error("No predictions returned from endpoint.")
+            except Exception as e:
+                st.error(f"Prediction failed: {e}")
 
 
 if __name__ == "__main__":
