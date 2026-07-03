@@ -114,3 +114,4 @@ if st.button("🚀 Make Prediction", type="primary", use_container_width=True):
                 st.error(f"🚨 Credit Score: **Poor**")
 
         except Exception as e:
+            print(f"Error! {e}")
