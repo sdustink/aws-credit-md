@@ -3,7 +3,7 @@ import pandas as pd
 import boto3
 import json
 
-ENDPOINT_NAME = "score-endpoint"
+ENDPOINT_NAME = "creditscore-endpoint"
 AWS_REGION = "us-east-1" 
 
 @st.cache_resource
