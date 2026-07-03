@@ -17,6 +17,7 @@ st.set_page_config(page_title="Credit Score App", layout="wide")
 st.title("💳 Credit Score Classification App (AWS Version)")
 st.markdown("---")
 
+
 col_left, col_mid, col_right = st.columns(3)
 
 with col_left:
@@ -59,7 +60,9 @@ with col_right:
     payment_of_min_amount = st.radio("Payment of Min Amount", ["Yes", "No", "NM"], index=0, horizontal=True)
 
 st.markdown("---")
+
 if st.button("🚀 Make Prediction", type="primary", use_container_width=True):
+
     input_dict = {
         "Credit_Mix": credit_mix,
         "Payment_of_Min_Amount": payment_of_min_amount,
@@ -86,73 +89,28 @@ if st.button("🚀 Make Prediction", type="primary", use_container_width=True):
 
     input_df = pd.DataFrame([input_dict])
 
-    with st.spinner("Sending data and requesting prediction from SageMaker..."):
+    with st.spinner("Sending request to SageMaker Endpoint..."):
         try:
             payload = input_df.to_csv(header=False, index=False).strip()
-            
+
             response = runtime_client.invoke_endpoint(
                 EndpointName=ENDPOINT_NAME,
                 ContentType="text/csv",
                 Body=payload
             )
-            
+
             response_body = response["Body"].read().decode("utf-8")
             predictions = json.loads(response_body)
-            
-            raw_label = str(predictions[0] if isinstance(predictions, list) else predictions).strip()
 
-            if raw_label in ["Good", "1"]:
-                pred_label = "Good"
-            elif raw_label in ["Standard", "0"]:
-                pred_label = "Standard"
+            pred_label = predictions[0] if isinstance(predictions, list) else predictions
+
+
+            st.subheader("Prediction Result:")
+            if pred_label in ["Good", 1, "1"]:
+                st.success(f"🎯 Credit Score: **Good**")
+            elif pred_label in ["Standard", 0, "0"]:
+                st.info(f"⚠️ Credit Score: **Standard**")
             else:
-                pred_label = "Poor"
+                st.error(f"🚨 Credit Score: **Poor**")
 
-            st.subheader("📊 Result Analysis")
-            res_left, res_right = st.columns([1, 2])
-
-            with res_left:
-                if pred_label == "Good":
-                    st.markdown(
-                        "<div style='padding:22px; border-radius:10px; background-color:lightblue; border-left:8px solid #28a745; text-align:center;'>"
-                        "<h1 style='color:darkblue; margin:0; font-family:sans-serif;'>🎯 GOOD</h1>"
-                        "<small style='color:darkblue; font-weight:bold;'>Low Risk Profile</small>"
-                        "</div>",
-                        unsafe_allow_html=True,
-                    )
-                elif pred_label == "Standard":
-                    st.markdown(
-                        "<div style='padding:22px; border-radius:10px; background-color:khaki; border-left:8px solid #ffc107; text-align:center;'>"
-                        "<h1 style='color:darkorange; margin:0; font-family:sans-serif;'>⚠️ STANDARD</h1>"
-                        "<small style='color:darkorange; font-weight:bold;'>Medium Risk Profile</small>"
-                        "</div>",
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    st.markdown(
-                        "<div style='padding:22px; border-radius:10px; background-color:lightgrey; border-left:8px solid #dc3545; text-align:center;'>"
-                        "<h1 style='color:darkred; margin:0; font-family:sans-serif;'>🚨 POOR</h1>"
-                        "<small style='color:darkred; font-weight:bold;'>High Risk Profile</small>"
-                        "</div>",
-                        unsafe_allow_html=True,
-                    )
-
-            with res_right:
-                if pred_label == "Good":
-                    st.info(
-                        "💡 **Rekomendasi Sistem:**\n\n"
-                        "Pengajuan kredit aman untuk disetujui. Nasabah memiliki riwayat keuangan sehat dan rasio utang yang rendah."
-                    )
-                elif pred_label == "Standard":
-                    st.warning(
-                        "💡 **Rekomendasi Sistem:**\n\n"
-                        "Pertimbangkan jaminan tambahan atau lakukan analisis riwayat mutasi bank 3 bulan terakhir sebelum menyetujui kredit."
-                    )
-                else:
-                    st.error(
-                        "💡 **Rekomendasi Sistem:**\n\n"
-                        "Risiko gagal bayar tinggi! Sangat disarankan untuk menolak pengajuan kredit atau memperketat syarat agunan."
-                    )
-                    
         except Exception as e:
-            st.error(f"Terjadi error saat memanggil AWS SageMaker: {e}")
