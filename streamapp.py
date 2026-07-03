@@ -4,7 +4,7 @@ import time
 import boto3
 import streamlit as st
 
-ENDPOINT_NAME = os.environ.get("ENDPOINT_NAME", "credit123")
+ENDPOINT_NAME = os.environ.get("ENDPOINT_NAME", "credit-score-123")
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 
 @st.cache_resource
